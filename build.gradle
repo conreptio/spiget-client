@@ -1,0 +1,62 @@
+plugins {
+  id 'java'
+  id 'idea'
+  id 'eclipse'
+  id 'net.minecrell.licenser' version '0.3'
+}
+
+group = 'com.neolumia'
+version = '1.0.0'
+
+repositories {
+  mavenCentral()
+  maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+}
+
+dependencies {
+  compileOnly group: 'org.bukkit', name: 'bukkit', version: '1.8.8-R0.1-SNAPSHOT'
+  testCompile group: 'org.bukkit', name: 'bukkit', version: '1.8.8-R0.1-SNAPSHOT'
+}
+
+javadoc {
+  options {
+    encoding = 'UTF-8'
+    links = [
+      'http://docs.oracle.com/javase/8/docs/api/',
+      'https://jd.spongepowered.org/6.0.0/',
+      'https://hub.spigotmc.org/javadocs/spigot/'
+    ]
+    addStringOption('Xdoclint:none', '-quiet')
+  }
+}
+
+license {
+  header = file('HEADER.txt')
+  newLine = true
+  include '**/*.java'
+}
+
+processResources {
+  from rootProject.file('COPYING')
+}
+
+task sourceJar(type: Jar) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  classifier = 'javadoc'
+  from javadoc.destinationDir
+}
+
+artifacts {
+  archives sourceJar
+  archives javadocJar
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '4.4'
+}
+
+apply from: rootProject.file('gradle/deploy.gradle')

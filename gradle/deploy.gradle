@@ -1,0 +1,58 @@
+apply plugin: 'maven-publish'
+
+ext.isRelease = {
+  return !project.version.endsWith("-SNAPSHOT")
+}
+
+publishing {
+  repositories {
+    if (project.hasProperty("deployUrl")) {
+      maven {
+        credentials {
+          username = "${deployUser}"
+          password = "${deployPass}"
+        }
+        url = String.format("${deployUrl}", isRelease ? 'releases' : 'snapshots')
+      }
+    }
+  }
+
+  publications {
+    maven(MavenPublication) {
+      from components.java
+      pom.withXml {
+        asNode().children().last() + {
+          resolveStrategy = DELEGATE_FIRST
+
+          name 'Spiget Client'
+          description 'A java client for the Spiget API'
+          url 'https://neolumia.com/'
+
+          ciManagement {
+            system 'Travis CI'
+            url 'https://travis-ci.org/neolumia/spiget-client'
+          }
+
+          issueManagement {
+            system 'GitHub Issues'
+            url 'https://github.com/neolumia/spiget-client/issues'
+          }
+
+          licenses {
+            license {
+              name 'GNU General Public License (GPL)'
+              url 'https://www.gnu.org/licenses/gpl.txt'
+              distribution 'repo'
+            }
+          }
+
+          scm {
+            url 'https://github.com/neolumia/spiget-client'
+            connection 'scm:git:git://github.com/neolumia/spiget-client.git'
+            developerConnection 'scm:git:ssh://github.com:neolumia/spiget-client.git'
+          }
+        }
+      }
+    }
+  }
+}
